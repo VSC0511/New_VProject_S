@@ -11,9 +11,11 @@ class EmptyColumnsError(Exception):
     pass
 
 
+
 # For empty rows
 class EmptyRowsError(Exception):
     pass
+
 
 
 # For both empty columns and rows
@@ -21,9 +23,23 @@ class EmptyColumnsAndRows(Exception):
     pass
 
 
+
+# Used when a delimeter in headers
+class DelimeterInColumns(Exception):
+    pass
+
+
+
+# Used when a delimeter in rows elements
+class DelimeterInRows(Exception):
+    pass
+    
+
+
 # If rows not similar to rows
 class NotSimilar(Exception):
     pass
+
 
 
 # If file is empty
@@ -31,9 +47,22 @@ class EmptyFile(Exception):
     pass
 
 
+
 # If line in a file is empty
 class EmptyLine(Exception):
     pass
+
+
+
+# Cleans up a file
+def clean_file(file_name) -> None:
+    return open(file_name, 'w').close()
+
+
+# Check is data in files exists
+def is_empty(file_name: str) -> bool:
+    return os.path.getsize(file_name) == 0
+
 
 
 class CsvHome:
@@ -43,69 +72,54 @@ class CsvHome:
         self.file_name = file_name
         self._columns: list = []
         self._rows: list = []
-        self.delimetr = delimeter
-    
-    
-    @property
-    def columns(self) -> str:
-        if not self._columns:
-            return 'Empty columns'
-
-        return f"Columns: {self._columns}"
-    
-    
-    @columns.setter
-    def columns(self, col_val) -> str:
-        self._columns = col_val
-
-    
-    @property
-    def rows(self) -> str:
-        if not self._rows:
-            return 'Empty rows'
-        
-        return f"Rows: {self._rows}"
-    
-    
-    @rows.setter
-    def rows(self, row_val) -> str:
-        self._rows = row_val
+        self.delimeter = delimeter
+        self.fill_up = False
+        self.remove_del_thg = False
         
     
     def __repr__(self) -> str:
         return "File: {}".format(self.file_name)
 
     
-    # Cleans up a file
-    def clean_file(self) -> None:
-        return open(self.file_name, 'w').close()
-    
-    
-    # Check is data in files exists
-    def is_empty(self) -> bool:
-        return os.path.getsize(self.file_name) == 0
-    
-    
-    # Prepares lengths for rown and headers 
-    def _prepare_length(self, headers: list, *lines: list, 
-                       fill_up: bool = False) -> None:
-        """_summary_
-
-        Args:
-            headers (list): columns of data
-            *lines (list): a list of lists(rows)
+    def _check_data(self) -> None:
+        
+        # If option to delete elements where delimeter is in
+        if self.remove_del_thg:   
             
-            fill_up (bool, optional): fills up short rows. Defaults to False.
-
-        Raises:
-            ValueError: if both headers and rows are empty raises this Error
-            ValueError: if fill_up is false and one of headers or rows is empty
-        """
+            # deleting wrong headers
+            for head_indx, head in enumerate(self.columns):
+                if self.delimeter in head:
+                    self.columns.pop(head_indx)
+            
+            # deleting wrong rows's elements
+            for row in self.rows:
+                for indx, inside in enumerate(row):
+                    if self.delimeter in inside:
+                        row.pop(indx)
         
-        self.columns = headers
-        self.rows = list(lines)
+        else: # Or just awares us about the delimeter
+            
+            # For headers
+            for head in self.columns:
+                if self.delimeter in head:
+                    raise DelimeterInColumns('No delimeter!')
+                
+            # For row's elements
+            for row in self.rows:
+                if self.delimeter in row:
+                    raise DelimeterInRows('No delimeter!')
+                 
+                 
+    # Prepares lengths for rown and headers 
+    def _prepare_length(self) -> None:
         
+        # Cheking delimeters in data
+        self._check_data()
+        
+        # Number of headers
         headers_length: int = len(self.columns)
+        
+        # Number of elements in rows
         rows_length: int = len(self.rows)
 
         # Let's prepare out data's length
@@ -116,7 +130,7 @@ class CsvHome:
         # Now let's check if lengths are similar or not
         # fills up empty with empty spaces or number is fill_up is True
         # cuts off to the shortest row or header if cut_off is True
-        if fill_up: 
+        if self.fill_up: 
             
             # Adds extra elements to short rows
             if headers_length > rows_length:
@@ -141,7 +155,7 @@ class CsvHome:
             # Can't just cut off without any data
             if not self.columns:
                 raise EmptyColumnsError('Columns are empty :(')
-                
+            
             if not self.rows:
                 raise EmptyRowsError('Rows are empty :(')
             
@@ -167,17 +181,10 @@ class CsvHome:
 
 
     # Structures data
-    def structure_data(self, headers: list, *lines: list, 
-                       fill_up: bool = False) -> list[list]:
-        
-        """_summary_
-
-        Returns:
-            list[list] return prepared rows
-        """
-        
+    def structure_data(self) -> list[list]:
+                
         # First, prepares rows and headers to a desired length
-        self._prepare_length(headers, *lines, fill_up=fill_up)
+        self._prepare_length()
         
         # Will be used to write data to files
         structured_data: list = []
@@ -203,20 +210,25 @@ class CsvHome:
     # Creates adn writes data into the file
     def write_file(self, headers: list, *rows: list,
                        fill_up_option: bool = False,
-                       check_file: bool = False) -> None | str:
+                       check_file: bool = False,
+                       remove_del_thg: bool = False) -> None | str:
     
         if check_file:
-            if self.is_empty():
+            if is_empty(self.file_name):
                 return 'Empty file'
             else:
                 return 'Some data in file'
-  
+        
+        self.columns = headers
+        self.rows = list(rows)
+        self.fill_up = fill_up_option
+        self.remove_del_thg = remove_del_thg
+        
         # Cooked data :>
-        prepared_data = self.structure_data(headers, *rows, 
-                                            fill_up=fill_up_option)
+        prepared_data = self.structure_data()
         
         with open(self.file_name, 'w', newline='') as write_file:
-            write_csv = csv.writer(write_file, delimiter=self.delimetr)
+            write_csv = csv.writer(write_file, delimiter=self.delimeter)
             write_csv.writerow(self.columns)
             write_csv.writerows(prepared_data)
     
@@ -233,8 +245,13 @@ class CsvHome:
             ValueError: if number of row's elements doesn't fit the existing one
         """
         
-        prepared_data = self.structure_data(headers, *lines,
-                                            fill_up=fill_up_option)
+        self.columns = headers
+        self.rows = list(lines)
+        
+        self.fill_up = fill_up_option
+        
+        # Preparing data before writing
+        prepared_data = self.structure_data()
         
         # to check if there are any headers
         # If there aren't any headers we write them and continue
@@ -243,8 +260,8 @@ class CsvHome:
                 
                 # need to check if new data fits the in file format 
                 # if file is empty writes headers
-                if self.is_empty():
-                    writer_headers = csv.writer(addrows, delimiter=self.delimetr)
+                if is_empty(self.file_name):
+                    writer_headers = csv.writer(addrows, delimiter=self.delimeter)
                     writer_headers.writerow(self.columns)
     
     
@@ -262,7 +279,7 @@ class CsvHome:
             
             # If headers weren't written we just add a row
             # now we write our new data
-            write_rows = csv.writer(add_data, delimiter=self.delimetr)
+            write_rows = csv.writer(add_data, delimiter=self.delimeter)
             write_rows.writerows(prepared_data)
 
 
@@ -281,7 +298,7 @@ class CsvHome:
         """
         
         # If the file is empty return this message
-        if self.is_empty():
+        if is_empty(self.file_name):
             raise EmptyFile('Empty file')
         
         # Used to add lists of the original form
