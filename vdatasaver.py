@@ -47,22 +47,28 @@ class CsvHome:
     
     
     @property
-    def columns_rows(self) -> str:
-        if not self._columns and not self._rows:
-            return 'Empty columns and rows'
-
+    def columns(self) -> str:
         if not self._columns:
             return 'Empty columns'
-        
+
+        return f"Columns: {self._columns}"
+    
+    
+    @columns.setter
+    def columns(self, col_val) -> str:
+        self._columns = col_val
+
+    
+    @property
+    def rows(self) -> str:
         if not self._rows:
             return 'Empty rows'
         
-        return f"Columns: {self._columns}\nRows: {self._rows}"
+        return f"Rows: {self._rows}"
     
     
-    @columns_rows.setter
-    def columns(self, col_val, row_val) -> str:
-        self._columns = col_val
+    @rows.setter
+    def rows(self, row_val) -> str:
         self._rows = row_val
         
     

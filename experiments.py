@@ -9,7 +9,9 @@ from vdatasaver import CsvHome
 writer = CsvHome('VDATA.csv')
 
 writer.columns = ['Hello']
-writer.rows = [['NA'], [2]]
+
+writer.rows = [['ol']]
 print(writer.columns)
+print(writer.rows)
 
 
