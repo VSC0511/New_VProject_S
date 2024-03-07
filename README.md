@@ -1,22 +1,26 @@
 # *vdatasaver.py*
-## CsvHome: Class for csv files
+## CsvHome: Methods for csv files
 
 - ## Attributes
-  - ### self.file_name
+  - ### self.file_name: str
      file name where data will be written
     
-  - ### self._columns
+  - ### self._columns: list
     Columns of a csv file or headers
     
-  - ### self._rows
+  - ### self._rows: list[list]
     Rows it is a matrix [[], [], ...]
     
-  - ### self.delimeter
-    Delimeter to separate rows and headers
-    By default is delimeter is a comma -> ,
+  - ### self.delimeter: str
+    Delimeter to separate rows and headers.
+    By default, delimeter is a comma -> ,
     
-  - ### self.fill_up
-    for _prepare_length()
+  - ### self.fill_up: bool
+    for _prepare_length() as an option
+    
+----------------------------------------------------
+----------------------------------------------------
+----------------------------------------------------
 
 ## _check_data() -> removes delimeters from headers and rows elements
 if remove_del_thg is false raises an excetion
@@ -53,13 +57,12 @@ vdatasaver.DelimeterInColumns: No delimeter!
 ----------------------------------------------------
 
 
-## _prepare_length()
-*if headers and rows are empty raises an exception.
-Used to fill up short headers, rows or rows elements,
-headers = ['Names', 'Age'],
-rows = [['Viper'], [23, 45, 23], [3, 4]],
-headers will be filled up with numbers starting from 0.
-fills up short rows until their length fit the longest one(3)*
+# _prepare_length()
+*if headers and rows are empty raises an exception*
+
+## if fill up is True:
+*1) Adds extra numbers starting from zero to headers when the number of headers doesn't equal to the number of rows*
+
 ```py
 from vdatasaver import CsvHome
 
@@ -67,7 +70,7 @@ writer = CsvHome('File_name.csv', delimeter=',')
 
 headers = ['Names', 'Age']
 
-rows = [['Viper'],[16, 23, 20], [3, 4]]
+rows = [['Viper', 'gola', 'adff'], [16, 23, 20], [3, 4, 23]]
 
 # Preparing lengths
 # just a test you won't be able to use this function 
@@ -76,41 +79,142 @@ writer._prepare_length(headers, *rows, fill_up=True)
 ```
 ## output: 
 
-headers: ['Names', 'Age', 0]
+headers: ['Names', 'Age', 0] <-- zero
 
-rows: [['Viper', '', ''], [16, 23, 20], [3, 4, '']]
+rows: [['Viper', 'gola', 'adff'], [16, 23, 20], [3, 4, 23]]
 
 ----------------------------------------------------
 
-*or by default fill_up is False.
-if either headers or rows are empty raises an Exception.
-cuts off headers and rows to the shortest length.
-headers = ['Names', 'Age']
-rows = [['Viper'], [23, 45, 23], [3, 4]].
-cuts off headers and makes equal to the number of rows(3)
-and deletes rows elements until the row fits the shortest one (['Viper'])
-headers  = ['Names', 'Age'],
-rows = [['Viper'], [2]].
-Removes delimeters in headers and rows
-self.remove_del_thg = False
-if headers and rows are empty raises an exception
-Used to fill up short headers, rows or rows elements
-headers = ['Names', 'Age']
-rows = [['Viper'], [23, 45, 23], [3, 4]]
-headers will be filled up with numbers starting from 0
-headers: ['Names', 'Age', 0]
-fills up short rows until their length fit the longest one(3)
-rows: [['Viper', '', ''], [23, 45, 23], [3, 4, '']]*
+
+*2) Adds extra row(list) to rows when the number of rows doesn't equal to the number of headers*
 
 ```py
-headers = ['Names', 'Age']
+from vdatasaver import CsvHome
 
-rows = [['Viper'],[16, 23, 20], [3, 4]]
+writer = CsvHome('File_name.csv', delimeter=',')
+
+headers = ['Names', 'Age', 'lol', 'extra']
+
+rows = [['Viper', 'gola', 'adff'],[16, 23, 20], [3, 4, 23]]
+
+# Preparing lengths
+# just a test you won't be able to use this function 
+writer._prepare_length(headers, *rows, fill_up=True)
+
+```
+## output: 
+
+headers: ['Names', 'Age', 'lol', 'extra']
+
+rows: [['Viper', 'gola', 'adff'], [16, 23, 20], [3, 4, 23], ['', '', '']]
+
+----------------------------------------------------
+
+
+*3) Adds empty values toshort rows till the short row equals the longest one*
+
+```py
+from vdatasaver import CsvHome
+
+writer = CsvHome('File_name.csv', delimeter=',')
+
+headers = ['Names', 'Age', 'lol']
+
+rows = [['Viper'],[16, 23], [3, 4, 23]]
+
+# Preparing lengths
+# just a test you won't be able to use this function 
+writer._prepare_length(headers, *rows, fill_up=True)
+
+```
+## output: 
+
+headers: ['Names', 'Age', 'lol']
+
+rows: [['Viper', '', ''], [16, 23, ''], [3, 4, 23]]
+
+----------------------------------------------------
+
+## if fill up is false:
+
+*Raises an exception if either headers or rows are empty.*
+
+----------------------------------------------------
+
+*Deletes rows if the number of headers is less than the number of rows.*
+
+```py
+from vdatasaver import CsvHome
+
+writer = CsvHome('File_name.csv', delimeter=',')
+
+headers = ['Names', 'Age', 'lol']
+
+rows = [['Viper'],[16, 23], [3, 4, 23], ['extra', 'eatr', 'extr', 'we']]
 
 # Preparing lengths
 # just a test you won't be able to use this function 
 writer._prepare_length(headers, *rows, fill_up=False)
 ```
+
+## output: 
+
+headers: ['Names', 'Age', 'lol']
+
+rows: [['Viper'], [16], [3]]
+
+----------------------------------------------------
+
+*Deletes headers if the number of rows is less than the number of headers.*
+
+```py
+from vdatasaver import CsvHome
+
+writer = CsvHome('File_name.csv', delimeter=',')
+
+headers = ['Names', 'Age', 'lol', 'ada', 'aaww', 'add']
+
+rows = [['Viper'],[16, 23], [3, 4, 23], ['extra', 'eatr', 'extr', 'we']]
+
+# Preparing lengths
+# just a test you won't be able to use this function 
+writer._prepare_length(headers, *rows, fill_up=False)
+```
+
+## output: 
+
+headers: ['Names', 'Age', 'lol', 'ada']
+
+rows: [['Viper'], [16], [3], ['extra']]
+
+----------------------------------------------------
+
+*Deletes rows elements till this row's length fits the shortest one*
+
+```py
+from vdatasaver import CsvHome
+
+writer = CsvHome('File_name.csv', delimeter=',')
+
+headers = ['Names', 'Age', 'lol']
+
+rows = [['Viper'],[16, 23], [3, 4, 23], ['extra', 'eatr', 'extr', 'we']]
+
+# Preparing lengths
+# just a test you won't be able to use this function 
+writer._prepare_length(headers, *rows, fill_up=False)
+```
+
+## output: 
+
+headers: ['Names', 'Age', 'lol']
+
+rows: [['Viper'], [16], [3]]
+
+----------------------------------------------------
+
+
+# structure_data()
 
 ## output if there is no data in the file: 
 
