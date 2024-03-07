@@ -22,7 +22,15 @@
 ----------------------------------------------------
 ----------------------------------------------------
 
-## _check_data() -> removes delimeters from headers and rows elements
+- # Methods:
+  
+# clean_file()
+cleans up the file
+
+# is_empty()
+checks if the file is empty or not
+
+# _check_data() -> removes delimeters from headers and rows elements
 if remove_del_thg is false raises an excetion
 else just removes elements with the delimeter
 
@@ -41,14 +49,14 @@ rows = [['Viper', 'Gola,', 'Lol'],
 writer._check_data(headers, *rows, remove_del_thg = True)
 ```
 
-### output if remove_del_thg is True: 
+## output if remove_del_thg is True: 
 
 headers: ['Gola', 'Status']
 
 rows: [['Viper', 'Lol'], [16, 23, 20], [1, 0, 1]]
 
 
-### output if remove_del_thg is False:
+## output if remove_del_thg is False:
 
 *raise DelimeterInColumns('No delimeter!')*
 
@@ -212,16 +220,61 @@ headers: ['Names', 'Age', 'lol']
 rows: [['Viper'], [16], [3]]
 
 ----------------------------------------------------
-
+----------------------------------------------------
 
 # structure_data()
 
-## output if there is no data in the file: 
+Takes each element from a row and adds it to a list (list_to_add)
 
-| Names | Age | Status |
-| ----- | --- | ------ |
-| Viper | 16  |    1   |
-| Gola  | 23  |    0   |
-| Lol   | 20  |    1   |
+and then adds to another list (prepared_data)
 
+```py
+from vdatasaver import CsvHome
 
+writer = CsvHome('File_name.csv', delimeter=',')
+
+headers = ['Names', 'Age', 'lol']
+
+rows = [['Viper', 'Nolan', 'Golang'], [3, 4, 23], ['extra', 'eatr', 'extr']]
+
+# Just a test, won't be able to use outside the class
+print(writer.structure_data(headers, *rows))
+```
+
+## output:
+
+rows = [['Viper', 3, 'extra'], ['Nolan', 4, 'eatr'], ['Golang', 23, 'extr']]
+
+----------------------------------------------------
+----------------------------------------------------
+
+# write_file()
+
+```py
+from vdatasaver import CsvHome
+
+writer = CsvHome('File_name.csv', delimeter=',')
+
+headers = ['Names', 'Age', 'Status']
+
+rows = [['Viper', 'Nolan', 'Golang'], [3, 4, 23], ['extra', 'eatr', 'extr']]
+
+# Just a test, won't be able to use outside the class
+print(writer.write_file(headers, *rows, fil_up=Optional, check_file=Optional, remove_del_thg=Optional))
+```
+
+## output if check_file is False or there is no data in the file: 
+
+| Names  | Age | Status |
+| ------ | --- | ------ |
+| Viper  | 3   |  extra |
+| Nolan  | 4   |  eatr  |
+| Golang | 23  |  extr  |
+
+## output if check_file is True or there is some data in the file:
+```py
+if is_empty(self.file_name):
+    return 'Empty file'
+else:
+    return 'Some data in file'
+```
