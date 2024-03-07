@@ -242,7 +242,7 @@ class CsvHome:
             check_headers: checks for headers in the file
             
         Raises:
-            ValueError: if number of row's elements doesn't fit the existing one
+            ValueError: if number of row's elements doesn't fit the existing ones
         """
         
         self.columns = headers
