@@ -271,6 +271,8 @@ print(writer.write_file(headers, *rows, fil_up=Optional, check_file=Optional, re
 | Nolan  | 4   |  eatr  |
 | Golang | 23  |  extr  |
 
+----------------------------------------------------
+
 ## output if check_file is True or there is some data in the file:
 ```py
 if is_empty(self.file_name):
@@ -278,3 +280,56 @@ if is_empty(self.file_name):
 else:
     return 'Some data in file'
 ```
+
+----------------------------------------------------
+----------------------------------------------------
+
+# take_back() -> retrieves data from a line, or lines
+
+Can retrieve data from multiple lines using start and end parameters.
+Start and end set to None by default.
+
+Can retrieve data from a specific line.
+By default equals to 1(1st line)
+
+*Examle:*
+
+| Names  | Age | Status |
+| ------ | --- | ------ |
+| Viper  | 3   |  extra |
+| Nolan  | 4   |  eatr  |
+| Golang | 23  |  extr  |
+
+```py
+from vdatasaver import CsvHome
+
+writer = CsvHome('File_name', delimeter=',')
+
+print(writer.take_back(line=2))
+```
+
+## output:
+
+[['Nolan'], [4], ['eatr']]
+
+----------------------------------------------------
+
+Or if start and end paremeters are given
+
+| Names  | Age | Status |
+| ------ | --- | ------ |
+| Viper  | 3   |  extra |
+| Nolan  | 4   |  eatr  |
+| Golang | 23  |  extr  |
+
+```py
+from vdatasaver import CsvHome
+
+writer = CsvHome('File_name', delimeter=',')
+
+print(writer.take_back(start=1, end=2))
+```
+
+## output:
+
+[['Viper', 'Nolan'], [3, 4], ['extra', 'eatr']]
