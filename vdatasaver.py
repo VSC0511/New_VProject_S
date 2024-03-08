@@ -309,16 +309,13 @@ class CsvHome:
         
         with open(self.file_name, '+r') as back:
             # If these two options are not None
-            if (start is not None) and (end is not None):
+            if (start) and (end):
                 
                 # Lines from start to end
-                lines_back = back.readlines()[start:end]
-                
+                lines_back = back.readlines()[start:end+1]
+          
                 # Separates values in the rows
                 row_elme = [row.split(',') for row in lines_back]
-                
-                # Getting rid of '\n' from the last element in each row
-                row_elme = [row[-1][:row[-1].find('\n')] for row in row_elme]
                 
                 # Restructures data. Turning it back to the original form
                 for index in range(len(row_elme[0])):
@@ -340,5 +337,10 @@ class CsvHome:
                         
                 except IndexError:
                     raise EmptyLine('Empty line')
-                    
+        
+        # Getting rid of '\n' from the last element in each row
+        for index, del_n in enumerate(prepared[-1]):
+            if '\n' in del_n:
+                prepared[-1][index] = del_n[:del_n.find('\n')]     
+                
         return prepared
